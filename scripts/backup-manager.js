@@ -101,7 +101,7 @@ function BackupManager(config) {
             ], {
                 nodeGroup : "proc",
                 envName : config.envName,
-                maintenanceUrl : _("http://%(host)/modules/tools/maintenance.jsp?fullReadOnlyMode", { host : config.maintenanceHost }),
+                maintenanceUrl : ("http://%(host)/modules/tools/maintenance.jsp?fullReadOnlyMode", { host : config.maintenanceHost }),
                 backupDir : backupDir
             }],
 
