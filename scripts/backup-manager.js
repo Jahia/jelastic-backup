@@ -109,7 +109,7 @@ function BackupManager(config) {
                 'number_of_backups=$(' + lftp.cmd("ls %(envName)/") + '| wc -l)',
                 '[ "${number_of_backups}" -gt "%(backupCount)" ] && { let "number_for_deletion = ${number_of_backups} - %(backupCount)"; backups_for_deletion=$(' + lftp.cmd("ls %(envName)") + ' | awk \'{print $9}\'|head -$number_for_deletion ); } || true',
                 '[ -n "$backups_for_deletion" ] && { for i in $backups_for_deletion; do ' + lftp.cmd([ "cd %(envName)/", "rm -r $i" ]) + '; done ; } || true;'
-            ], 
+            
         ]);
     };
 
