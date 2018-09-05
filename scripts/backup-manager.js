@@ -86,8 +86,8 @@ function BackupManager(config) {
             [ me.checkEnvStatus ],
             [ me.cmd, [
                 lftp.cmd([
-                    "sudo mkdir %(envName)",
-                    "sudo mkdir %(envName)/%(backupDir)"
+                    "mkdir %(envName)",
+                    "mkdir %(envName)/%(backupDir)"
                 ]),
                 'wget --http-user=${MANAGER_USER} --http-password=${MANAGER_PASSWORD} -O - %(maintenanceUrl)=true',
                 'tar -zcf data.tar.gz /data',
