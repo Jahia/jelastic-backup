@@ -20,7 +20,6 @@ function run() {
         envName           : envName,
         envAppid          : envAppid,
         maintenanceHost   : maintenanceHost,
-     
         ftpHost           : ftpHost,
         ftpUser           : ftpUser,
         ftpPassword       : ftpPassword,
