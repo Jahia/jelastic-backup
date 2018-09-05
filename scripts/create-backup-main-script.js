@@ -12,7 +12,7 @@ var scriptName        = getParam("scriptName", "${env.envName}-jahia-backup"),
 function run() {
     var BackupManager = use("scripts/backup-manager.js", {
         session           : session,
-        baseUrl           : baseUrl,
+        
         uid               : user.uid,
         cronTime          : cronTime,
         scriptName        : scriptName,
