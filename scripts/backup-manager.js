@@ -92,7 +92,7 @@ function BackupManager(config) {
                 'wget --http-user=${MANAGER_USER} --http-password=${MANAGER_PASSWORD} -O - %(maintenanceUrl)=true',
                 'tar -zcf data.tar.gz /data',
                 'mysqldump --user=${DB_USER} --password=${DB_PASSWORD} -h mysqldb --single-transaction --quote-names --opt --databases --compress jahia > jahia.sql',
-                'wget --http-user=${MANAGER_USER} --http-password=${MANAGER_PASSWORD} -O %(maintenanceUrl)=false',
+                'wget --http-user=${MANAGER_USER} --http-password=${MANAGER_PASSWORD} -O - %(maintenanceUrl)=false',
                 lftp.cmd([
                     "cd %(envName)/%(backupDir)",
                     "put data.tar.gz",
@@ -101,15 +101,31 @@ function BackupManager(config) {
             ], {
                 nodeGroup : "proc",
                 envName : config.envName,
-                maintenanceUrl : ("http://%(host)/modules/tools/maintenance.jsp?fullReadOnlyMode", { host : config.maintenanceHost }),
+                maintenanceUrl : _("http://%(host)/modules/tools/maintenance.jsp?fullReadOnlyMode", { host : config.maintenanceHost }),
                 backupDir : backupDir
             }],
 
-          
+            [ me.cmd, [
+                "CT='Content-Type:application/json'",
+                "curl -H $CT -X PUT -d '{\"type\":\"fs\",\"settings\":{\"location\":\"all\"}}' '%(elasticSearchUrl)'",
+                "curl -H $CT -X DELETE '%(elasticSearchUrl)/snapshot'",
+                "curl -H $CT -X PUT '%(elasticSearchUrl)/snapshot?wait_for_completion=true'",
+                "tar -zcf es.tar.gz /var/lib/elasticsearch/backup/*",
+
+                lftp.cmd([
+                    "cd %(envName)/%(backupDir)",
+                    "put es.tar.gz"
+                ]),
                 'number_of_backups=$(' + lftp.cmd("ls %(envName)/") + '| wc -l)',
                 '[ "${number_of_backups}" -gt "%(backupCount)" ] && { let "number_for_deletion = ${number_of_backups} - %(backupCount)"; backups_for_deletion=$(' + lftp.cmd("ls %(envName)") + ' | awk \'{print $9}\'|head -$number_for_deletion ); } || true',
                 '[ -n "$backups_for_deletion" ] && { for i in $backups_for_deletion; do ' + lftp.cmd([ "cd %(envName)/", "rm -r $i" ]) + '; done ; } || true;'
-            
+            ], {
+                nodeGroup: "es",
+                envName : config.envName,
+                elasticSearchUrl : _("http://%(host):9200/_snapshot/all", { host : config.elasticSearchHost }),
+                backupCount : config.backupCount,
+                backupDir : backupDir
+            }]
         ]);
     };
 
